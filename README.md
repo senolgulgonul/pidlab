@@ -1,1 +1,1 @@
-A  PID simulator
+An offline PID tuner/simulator
