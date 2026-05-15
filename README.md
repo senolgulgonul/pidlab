@@ -48,4 +48,4 @@ MIT
 
 If PIDLab is useful in published work, a citation to the related paper is appreciated:
 
-> Gulgonul, S. (2026). *Analytical PI Tuning for Second-Order Plants with Monotonic Response and Minimum Settling Time*. [https://github.com/senolgulgonul/pidlab]
+Gülgönül, Ş. (2026). PIDLab: Offline PID parameter tuning and visualization tool (Version 1.0.0) GitHub. https://github.com/senolgulgonul/pidlab
