@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PIDLab v9.5.2.22 — Step / Bode / Nyquist / Root Locus</title>
+<title>PIDLab v9.5.2.23 — Step / Bode / Nyquist / Root Locus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -412,6 +412,13 @@
     .sidebar { border-right: none; border-bottom: 1px solid var(--line); height: auto; }
     .main { height: auto; }
     .metrics { grid-template-columns: repeat(2, 1fr); }
+    /* On mobile the page is a scrolling document (height: auto), which makes
+       `flex: 1` and percentage heights ambiguous inside `.plot-card`. Pin a
+       concrete height here so canvases have a real container to fill.
+       Without this, switching from Step to Bode/Nyquist/Root Locus on iOS
+       Safari leaves the canvas at 0×0 (Step works only because its initial
+       load gave the card a non-zero intrinsic height). */
+    .plot-card { height: 60vh; min-height: 360px; flex: none; }
   }
 </style>
 </head>
@@ -423,7 +430,7 @@
     <div class="brand">
       <span class="dot"></span>
       <h1>PID · Lab</h1>
-      <span class="ver">v9.5.2.22</span>
+      <span class="ver">v9.5.2.23</span>
     </div>
 
     <div class="section-title">Plant  P(s) = N(s)/D(s) · e<sup>−sL</sup></div>
