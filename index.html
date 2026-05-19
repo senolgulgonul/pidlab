@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PIDLab v9.5.2.21 — Step / Bode / Nyquist / Root Locus</title>
+<title>PIDLab v9.5.2.22 — Step / Bode / Nyquist / Root Locus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -423,7 +423,7 @@
     <div class="brand">
       <span class="dot"></span>
       <h1>PID · Lab</h1>
-      <span class="ver">v9.5.2.21</span>
+      <span class="ver">v9.5.2.22</span>
     </div>
 
     <div class="section-title">Plant  P(s) = N(s)/D(s) · e<sup>−sL</sup></div>
@@ -2926,22 +2926,29 @@ function setView(v){
     stepBtn.classList.add("active"); stepBtn.setAttribute("aria-selected","true");
     canvas.classList.remove("hidden");
     metricsStep.style.display = "";
-    requestAnimationFrame(() => drawPlot());
+    // Force synchronous layout flush so canvas has dimensions before draw.
+    // (iOS Safari sometimes runs requestAnimationFrame before reflow completes
+    //  after a display:none → display:block change, leaving the canvas 0×0.)
+    void canvas.offsetHeight;
+    drawPlot();
   } else if(v === "bode"){
     bodeBtn.classList.add("active"); bodeBtn.setAttribute("aria-selected","true");
     bodeCanvas.classList.remove("hidden");
     metricsBode.style.display = "";
-    requestAnimationFrame(() => drawBodePlot());
+    void bodeCanvas.offsetHeight;
+    drawBodePlot();
   } else if(v === "nyquist"){
     nyqBtn.classList.add("active"); nyqBtn.setAttribute("aria-selected","true");
     nyquistCanvas.classList.remove("hidden");
     metricsNyquist.style.display = "";
-    requestAnimationFrame(() => drawNyquistPlot());
+    void nyquistCanvas.offsetHeight;
+    drawNyquistPlot();
   } else { // rlocus
     rlocBtn.classList.add("active"); rlocBtn.setAttribute("aria-selected","true");
     rlocusCanvas.classList.remove("hidden");
     metricsRlocus.style.display = "";
-    requestAnimationFrame(() => drawRlocusPlot());
+    void rlocusCanvas.offsetHeight;
+    drawRlocusPlot();
   }
 }
 
