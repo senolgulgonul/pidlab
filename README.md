@@ -2,7 +2,7 @@
 
 A browser-based playground for PID controller design and analysis. Step Response, Bode Diagram, Nyquist Diagram and Root Locus, all in a single HTML file, no install required.
 
-<img width="1882" height="796" alt="image" src="https://github.com/user-attachments/assets/17b09e9b-7572-4be5-a99a-fd7ef9717f75" />
+![PIDLab](docs/pidlab_screenshot.png)
 
 ## Try it
 
