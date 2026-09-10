@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PIDLab v9.5.2.23 — Step / Bode / Nyquist / Root Locus</title>
+<title>PIDLab v9.8.2 — Step / Bode / Nyquist / Root Locus</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -282,6 +282,7 @@
     border-radius: 4px;
     padding: 5px 8px;
   }
+  .metric .k .lc, .metric .k sub { text-transform: none; }
   .metric .k {
     font-family: "JetBrains Mono", monospace;
     font-size: 8px;
@@ -297,6 +298,8 @@
     color: var(--text);
     font-weight: 700;
   }
+  .metric.unsettled { background: #c0392b; border-color: #c0392b; }
+  .metric.unsettled .k, .metric.unsettled .v, .metric.unsettled .u { color: #fff; }
   .metric .u {
     font-size: 9px;
     color: var(--text-faint);
@@ -430,7 +433,7 @@
     <div class="brand">
       <span class="dot"></span>
       <h1>PID · Lab</h1>
-      <span class="ver">v9.5.2.23</span>
+      <span class="ver">v9.8.2</span>
     </div>
 
     <div class="section-title">Plant  P(s) = N(s)/D(s) · e<sup>−sL</sup></div>
@@ -442,7 +445,7 @@
 
     <div class="field">
       <label>Denominator D(s)</label>
-      <input type="text" id="den" value="1 2 1" autocomplete="off" />
+      <input type="text" id="den" value="1 3 3 1" autocomplete="off" />
     </div>
 
     <div class="field inline">
@@ -453,11 +456,11 @@
     <div class="pid-grid">
       <div class="field pid-cell">
         <label>Kp</label>
-        <input type="number" id="kp" value="1" step="0.1" />
+        <input type="number" id="kp" value="2" step="0.1" />
       </div>
       <div class="field pid-cell">
         <label>Ki</label>
-        <input type="number" id="ki" value="0" step="0.1" />
+        <input type="number" id="ki" value="1" step="0.1" />
       </div>
       <div class="field pid-cell">
         <label>Kd</label>
@@ -473,7 +476,7 @@
     <div class="row-2">
       <div class="field">
         <label>Stop time (s)</label>
-        <input type="number" id="tstop" value="10" step="1" min="0.1" />
+        <input type="number" id="tstop" value="25" step="1" min="0.1" />
       </div>
       <div class="field">
         <label>Step size dt (s)</label>
@@ -522,7 +525,7 @@
         <div class="k">Overshoot</div>
         <div class="v"><span id="m_os">—</span><span class="u">%</span></div>
       </div>
-      <div class="metric">
+      <div class="metric" id="metric_ts">
         <div class="k">Settling time (2%)</div>
         <div class="v"><span id="m_ts">—</span><span class="u">s</span></div>
       </div>
@@ -547,11 +550,11 @@
         <div class="v"><span id="m_pm">—</span><span class="u">deg</span></div>
       </div>
       <div class="metric">
-        <div class="k">At freq. ω<sub>cg</sub> (−180°)</div>
+        <div class="k">At freq. <span class="lc">ω</span><sub>cg</sub> (−180°)</div>
         <div class="v"><span id="m_wpc">—</span><span class="u">rad/s</span></div>
       </div>
       <div class="metric">
-        <div class="k">At freq. ω<sub>cp</sub> (0 dB)</div>
+        <div class="k">At freq. <span class="lc">ω</span><sub>cp</sub> (0 dB)</div>
         <div class="v"><span id="m_wgc">—</span><span class="u">rad/s</span></div>
       </div>
       <div class="metric">
@@ -571,11 +574,11 @@
         <div class="v"><span id="m_mt">—</span></div>
       </div>
       <div class="metric">
-        <div class="k">At ω<sub>Ms</sub> / ω<sub>Mt</sub></div>
+        <div class="k">At <span class="lc">ω</span><sub>Ms</sub> / <span class="lc">ω</span><sub>Mt</sub></div>
         <div class="v"><span id="m_wmsmt">—</span><span class="u">rad/s</span></div>
       </div>
       <div class="metric">
-        <div class="k">Min |1 + L(jω)|</div>
+        <div class="k">Min |1 + L(<span class="lc">jω</span>)|</div>
         <div class="v"><span id="m_sm">—</span></div>
       </div>
       <div class="metric">
@@ -606,9 +609,9 @@
         <div class="rl-legend" id="m_rl_legend">
           <span class="leg-item"><span class="leg-sq" style="background:#c0392b"></span> CL pole</span>
           <span class="leg-item"><span class="leg-o" style="color:#c0392b">○</span> CL zero</span>
-          <span class="leg-item leg-dot" id="leg_kp" style="display:none"><span style="color:#0072BD">•••</span> Kp sweep</span>
-          <span class="leg-item leg-dot" id="leg_ki" style="display:none"><span style="color:#2e8b3d">•••</span> Ki sweep</span>
-          <span class="leg-item leg-dot" id="leg_kd" style="display:none"><span style="color:#7E2F8E">•••</span> Kd sweep</span>
+          <span class="leg-item leg-dot" id="leg_kp" style="display:none"><span style="color:#0072BD">•••</span> Kp locus</span>
+          <span class="leg-item leg-dot" id="leg_ki" style="display:none"><span style="color:#2e8b3d">•••</span> Ki locus</span>
+          <span class="leg-item leg-dot" id="leg_kd" style="display:none"><span style="color:#C9A000">•••</span> Kd locus</span>
         </div>
       </div>
       <!-- hidden spans kept for JS compat -->
@@ -820,8 +823,12 @@ function simulate(params){
   const dt_inner = dt / sub;
 
   // delay buffer: store past u values, at the *inner* step rate
-  const delaySamples = Math.max(0, Math.round(L / dt_inner));
-  const buf = new Array(delaySamples + 1).fill(0);
+  // A ring buffer of length d gives a delay of exactly d*dt_inner (read happens
+  // d pushes after write). Length is at least 1 so the loop always has the
+  // one-step computational delay of a sampled controller; for L>0 the delay is
+  // round(L/dt_inner)*dt_inner ≈ L rather than L + dt_inner.
+  const delaySamples = Math.max(1, Math.round(L / dt_inner));
+  const buf = new Array(delaySamples).fill(0);
   let bufIdx = 0;
   function pushDelay(val){
     buf[bufIdx] = val;
@@ -832,9 +839,24 @@ function simulate(params){
   }
 
   // States
-  let x = new Array(n).fill(0);   // plant
+  let x = new Float64Array(n);    // plant
   let xi = 0;                     // integrator state for Ki
   let xd = 0;                     // derivative filter state
+
+  // Allocation-free RK4 scratch (A flattened row-major)
+  const Af = new Float64Array(n*n);
+  for(let i = 0; i < n; i++) for(let j = 0; j < n; j++) Af[i*n + j] = A[i][j];
+  const Bf = new Float64Array(B), Cf = new Float64Array(C);
+  const k1 = new Float64Array(n), k2 = new Float64Array(n), k3 = new Float64Array(n), k4 = new Float64Array(n), xt = new Float64Array(n);
+  function fInto(out, xv, u_in){
+    for(let i = 0; i < n; i++){
+      let acc = Bf[i]*u_in;
+      const row = i*n;
+      for(let j = 0; j < n; j++) acc += Af[row + j]*xv[j];
+      out[i] = acc;
+    }
+  }
+  function cDot(xv){ let acc = 0; for(let i = 0; i < n; i++) acc += Cf[i]*xv[i]; return acc; }
 
   // Derivative function for RK4
   // state vector z = [x (n), xi, xd]
@@ -862,7 +884,7 @@ function simulate(params){
   // ---------- Initial conditions ----------
   t[0] = 0;
   r[0] = ref;
-  const y0 = dotVec(C, x) + D * 0;
+  const y0 = cDot(x) + D * 0;
   y[0] = y0;
   const e0 = ref - y0;
   const u0 = Kp*e0 + Ki*xi + Kd*Nf*(e0 - xd);
@@ -882,18 +904,18 @@ function simulate(params){
       // 1. Read delayed plant input
       const u_delayed = readDelay();
 
-      // 2. RK4 on plant state with constant u_delayed over dt_inner
-      const k1 = f_plant(x, u_delayed);
-      const x2 = vecAdd(x, vecScale(k1, dt_inner/2));
-      const k2 = f_plant(x2, u_delayed);
-      const x3 = vecAdd(x, vecScale(k2, dt_inner/2));
-      const k3 = f_plant(x3, u_delayed);
-      const x4 = vecAdd(x, vecScale(k3, dt_inner));
-      const k4 = f_plant(x4, u_delayed);
-      x = vecAdd(x, vecScale(vecAdd(vecAdd(k1, vecScale(k2,2)), vecAdd(vecScale(k3,2), k4)), dt_inner/6));
+      // 2. RK4 on plant state with constant u_delayed over dt_inner (in place)
+      fInto(k1, x, u_delayed);
+      for(let i = 0; i < n; i++) xt[i] = x[i] + 0.5*dt_inner*k1[i];
+      fInto(k2, xt, u_delayed);
+      for(let i = 0; i < n; i++) xt[i] = x[i] + 0.5*dt_inner*k2[i];
+      fInto(k3, xt, u_delayed);
+      for(let i = 0; i < n; i++) xt[i] = x[i] + dt_inner*k3[i];
+      fInto(k4, xt, u_delayed);
+      for(let i = 0; i < n; i++) x[i] += (dt_inner/6)*(k1[i] + 2*k2[i] + 2*k3[i] + k4[i]);
 
       // 3. New plant output
-      yk = dotVec(C, x) + D * u_delayed;
+      yk = cDot(x) + D * u_delayed;
 
       // 4. Controller
       const rk = ref;
@@ -1850,14 +1872,25 @@ const nyquistView = {
 };
 
 function nyquistAutoFitLimits(re, im, N){
+  /* Frame the region that matters for margins: the critical point (-1,0), the
+     origin, the 1/Ms circle around -1, and the gain crossover (-1/GM) point.
+     Square, equal-aspect window. */
   let maxRe = -Infinity;
   for(let i = 0; i < N; i++){
     if(Number.isFinite(re[i]) && re[i] > maxRe) maxRe = re[i];
   }
-  if(!Number.isFinite(maxRe)) maxRe = 1;
-  const xRight = Math.min(4, Math.max(1, maxRe + 0.2));
-  const reMin = -2;
-  const reMax = xRight;
+  if(!Number.isFinite(maxRe)) maxRe = 0;
+  let left = -1.6;
+  if(nyquistData && Number.isFinite(nyquistData.Ms) && nyquistData.Ms > 0){
+    left = Math.min(left, -1 - 1/nyquistData.Ms - 0.25);
+  }
+  if(bodeData && bodeData.margins && Number.isFinite(bodeData.margins.GM)){
+    const gx = -Math.pow(10, -bodeData.margins.GM/20);
+    left = Math.min(left, gx - 0.3);
+  }
+  left = Math.max(left, -4);
+  const reMin = left;
+  const reMax = Math.min(0.6, Math.max(0.35, maxRe + 0.2));
   const xSpan = reMax - reMin;
   return { reMin, reMax, imMin: -xSpan/2, imMax: xSpan/2 };
 }
@@ -1881,6 +1914,98 @@ function resizeNyquistCanvas(){
    - Mt = max |T(jω)| = max |L/(1+L)|    (complementary sensitivity peak)
    - min |1+L| = 1/Ms (distance from L curve to -1, sensitivity margin)
    Also estimates net encirclements of (-1, 0) by the full Nyquist contour. */
+
+/* Exact Nyquist criterion by the argument principle.
+   Open loop L(s) = C(s) P(s) e^{-sL} with C(s) = Kp + Ki/s + Kd N s/(s+N).
+   The D-contour is: up the imaginary axis (indented to the right around the
+   pole at the origin), then a large clockwise arc through the right half
+   plane. By conjugate symmetry the total change of arg(1+L) is twice that of
+   the upper half path: s = eps (real) -> quarter arc to j*eps -> j*omega up to
+   jR -> quarter arc back to R (real). Each piece is sampled adaptively so that
+   consecutive samples differ in phase by less than pi/2.
+   Returns { P (open-loop RHP poles), Ncw (clockwise encirclements of -1), Z (RHP
+   closed-loop poles) } or NaN fields if the count is not reliable (a sample
+   fell on 1+L = 0, or an open-loop pole other than the origin lies on the
+   imaginary axis, which is not indented). */
+function nyquistWinding(num, den, Ld, Kp, Ki, Kd, Nf){
+  const numT = trimLeadingZeros(num), denT = trimLeadingZeros(den);
+  const openPoles = polyRoots(denT);
+  const P = openPoles.filter(z => z.re > 1e-9).length;
+  const bad = { P, Ncw: NaN, Z: NaN };
+  // Pole scale: for eps and R selection
+  let pmin = Infinity, pmax = 0;
+  for(const z of openPoles){
+    const m = Math.hypot(z.re, z.im);
+    if(m > 1e-12){ pmin = Math.min(pmin, m); pmax = Math.max(pmax, m); }
+    // imaginary-axis pole away from the origin: not handled
+    if(m > 1e-12 && Math.abs(z.re) <= 1e-9) return bad;
+  }
+  for(const z of polyRoots(numT)){ const m = Math.hypot(z.re, z.im); if(m > 1e-12) pmax = Math.max(pmax, m); }
+  if(Kd !== 0) pmax = Math.max(pmax, Nf);
+  if(!Number.isFinite(pmin)) pmin = 1;
+  if(pmax === 0) pmax = 1;
+  const eps = Math.min(pmin, 1) * 1e-3;
+
+  function polyAt(c, s){ // Horner, complex
+    let r = { re: 0, im: 0 };
+    for(const v of c) r = cAdd(cMul(r, s), { re: v, im: 0 });
+    return r;
+  }
+  function Lat(s){
+    let C = { re: Kp, im: 0 };
+    if(Ki !== 0) C = cAdd(C, cDiv({ re: Ki, im: 0 }, s));
+    if(Kd !== 0) C = cAdd(C, cDiv(cMul({ re: Kd*Nf, im: 0 }, s), cAdd(s, { re: Nf, im: 0 })));
+    let Pv = cDiv(polyAt(numT, s), polyAt(denT, s));
+    if(Ld > 0){
+      const e = Math.exp(-s.re*Ld);
+      Pv = cMul(Pv, { re: e*Math.cos(-s.im*Ld), im: e*Math.sin(-s.im*Ld) });
+    }
+    return cMul(C, Pv);
+  }
+  // Choose R so that |L| is small on the far arc / axis (strictly proper), else 1e3*pmax.
+  let R = pmax * 1e3;
+  for(let k = 0; k < 8; k++){
+    const m = Math.max(cAbs(Lat({ re: 0, im: R })), cAbs(Lat({ re: R, im: 0 })));
+    if(m < 1e-3) break;
+    R *= 10;
+  }
+  // Path pieces as t in [0,1] -> s
+  const pieces = [
+    { n: 40,  f: t => ({ re: eps*Math.cos(t*Math.PI/2), im: eps*Math.sin(t*Math.PI/2) }) },
+    { n: 800, f: t => ({ re: 0, im: Math.exp(Math.log(eps) + t*(Math.log(R) - Math.log(eps))) }) },
+    { n: 60,  f: t => ({ re: R*Math.cos((1 - t)*Math.PI/2), im: R*Math.sin((1 - t)*Math.PI/2) }) }
+  ];
+  let total = 0; // accumulated change of arg(1+L), radians, along the upper half path
+  let fail = false;
+  function g(t, piece){ const v = Lat(piece.f(t)); return { re: v.re + 1, im: v.im }; }
+  function segment(t0, g0, t1, g1, piece, depth){
+    if(fail) return;
+    if(cAbs(g0) < 1e-12 || cAbs(g1) < 1e-12){ fail = true; return; }
+    let d = cArg(g1) - cArg(g0);
+    while(d > Math.PI) d -= 2*Math.PI;
+    while(d < -Math.PI) d += 2*Math.PI;
+    if(Math.abs(d) < Math.PI/2 || depth >= 14){ total += d; return; }
+    const tm = 0.5*(t0 + t1), gm = g(tm, piece);
+    segment(t0, g0, tm, gm, piece, depth + 1);
+    segment(tm, gm, t1, g1, piece, depth + 1);
+  }
+  for(const piece of pieces){
+    let tPrev = 0, gPrev = g(0, piece);
+    for(let i = 1; i <= piece.n; i++){
+      const t = i / piece.n, gv = g(t, piece);
+      segment(tPrev, gPrev, t, gv, piece, 0);
+      tPrev = t; gPrev = gv;
+    }
+    if(fail) return bad;
+  }
+  // Full contour: 2*total (counter-clockwise positive). The contour itself is
+  // traversed clockwise, so arg principle gives 2*total/(2pi) = -(Z - P).
+  const wind = Math.round(2*total / (2*Math.PI));
+  const Z = P - wind;
+  const Ncw = Z - P;
+  return { P, Ncw, Z };
+}
+
 function computeNyquist(bode){
   const { w, magDB, phaseDeg } = bode;
   const N = w.length;
@@ -1912,19 +2037,9 @@ function computeNyquist(bode){
   const wMs = w[dMinIdx];
   const wMt = w[mtIdx];
 
-  // Net encirclements of (-1, 0) by the positive-frequency branch.
-  // Count crossings of the negative real axis (Im sign change) at points
-  // where Re < -1. The full Nyquist contour (positive + mirror) doubles this.
-  let halfCCW = 0, halfCW = 0;
-  for(let i = 1; i < N; i++){
-    if(re[i] < -1 && re[i-1] < -1){
-      if(im[i-1] < 0 && im[i] >= 0) halfCCW++;
-      else if(im[i-1] > 0 && im[i] <= 0) halfCW++;
-    }
-  }
-  const Nenc = halfCCW - halfCW;
-  const totalEnc = 2 * Nenc;
-
+  // Encirclements of (-1, 0) are computed exactly by nyquistWinding() (argument
+  // principle on the full D-contour); the caller stores the result here.
+  const totalEnc = NaN;
   return { w, re, im, smMin: dMin, wsm: w[dMinIdx], Ms, Mt, wMs, wMt, totalEnc };
 }
 
@@ -2131,6 +2246,11 @@ function drawNyquistPlot(){
       nyquistCtx.arc(xPx(-1), yPx(0), radPx, 0, Math.PI * 2);
       nyquistCtx.stroke();
       nyquistCtx.setLineDash([]);
+      nyquistCtx.fillStyle = "#999999";
+      nyquistCtx.font = "10px 'Space Grotesk', sans-serif";
+      nyquistCtx.textAlign = "center";
+      nyquistCtx.textBaseline = "bottom";
+      nyquistCtx.fillText("1/Ms", xPx(-1), yPx(0) - radPx - 3);
       nyquistCtx.restore();
     }
   }
@@ -2195,6 +2315,50 @@ function drawNyquistPlot(){
       nyquistCtx.fill();
     }
   }
+  /* ---------- Gain and phase margin markers ----------
+     Same colours as the dashed lines on the Bode plot: green = ωcg (phase
+     crossover, GM measured there), red = ωcp (gain crossover, PM measured there).
+     GM: distance along the negative real axis from the curve's -180° crossing to -1.
+     PM: angle on the unit circle from the negative real axis to the 0 dB crossing. */
+  if(bodeData && bodeData.margins){
+    const mg = bodeData.margins;
+    nyquistCtx.save();
+    nyquistCtx.font = "600 10.5px 'Space Grotesk', sans-serif";
+    nyquistCtx.textBaseline = "middle";
+    if(Number.isFinite(mg.GM)){
+      const gx = -Math.pow(10, -mg.GM/20); // |L| at phase crossover, on negative real axis
+      const X0 = xPx(gx), X1 = xPx(-1), Y = yPx(0);
+      nyquistCtx.strokeStyle = "#2e8b3d";
+      nyquistCtx.lineWidth = 1.5;
+      nyquistCtx.beginPath(); nyquistCtx.moveTo(X0, Y); nyquistCtx.lineTo(X1, Y); nyquistCtx.stroke();
+      nyquistCtx.fillStyle = "#2e8b3d";
+      nyquistCtx.beginPath(); nyquistCtx.arc(X0, Y, 3.5, 0, 2*Math.PI); nyquistCtx.fill();
+      nyquistCtx.textAlign = "center";
+      if(Math.abs(X1 - X0) > 18) nyquistCtx.fillText("GM", (X0 + X1)/2, Y + 11);
+
+    }
+    if(Number.isFinite(mg.PM)){
+      const pm = mg.PM*Math.PI/180;
+      const ang = -Math.PI + pm; // phase of L at gain crossover: -180° + PM (math convention)
+      const px = Math.cos(ang), py = Math.sin(ang);
+      const rPx = 1 / (reMax - reMin) * Bw;
+      nyquistCtx.strokeStyle = "#c0392b";
+      nyquistCtx.lineWidth = 1.5;
+      // arc on the unit circle from -180° to the crossing point; canvas angles are
+      // the negatives of math angles (y axis points down)
+      nyquistCtx.beginPath();
+      nyquistCtx.arc(xPx(0), yPx(0), rPx, Math.PI, Math.PI - pm, pm > 0);
+      nyquistCtx.stroke();
+      nyquistCtx.fillStyle = "#c0392b";
+      nyquistCtx.beginPath(); nyquistCtx.arc(xPx(px), yPx(py), 3.5, 0, 2*Math.PI); nyquistCtx.fill();
+      const midA = -Math.PI + 0.5*pm;
+      nyquistCtx.textAlign = "center";
+      if(Math.abs(pm) * rPx > 18) nyquistCtx.fillText("PM", xPx(1.12*Math.cos(midA)), yPx(1.12*Math.sin(midA)));
+
+    }
+    nyquistCtx.restore();
+  }
+
   nyquistCtx.restore();
 
   /* ---------- Critical point (-1, 0) ---------- */
@@ -2453,7 +2617,7 @@ function rl_cDiv(a,b){const d=b.re*b.re+b.im*b.im;return{re:(a.re*b.re+a.im*b.im
 function rl_cAbs(a){return Math.hypot(a.re,a.im);}
 
 /* Polynomial roots via Durand-Kerner (Weierstrass) iteration. */
-function polyRoots(coefs){
+function polyRoots(coefs, guess){
   // trim leading zeros
   let c = coefs.slice();
   while(c.length > 1 && Math.abs(c[0]) < 1e-15) c.shift();
@@ -2462,6 +2626,13 @@ function polyRoots(coefs){
   const a = c.map(v => v / a0);
   const n = a.length - 1;
   if(n === 1) return [{re: -a[1], im: 0}];
+  // Warm start: if a guess with the same degree is supplied (e.g. the roots at a
+  // neighbouring gain during a locus sweep), start from it, slightly perturbed
+  // so that no two starting points coincide.
+  if(guess && guess.length === n && guess.every(z => Number.isFinite(z.re) && Number.isFinite(z.im))){
+    const roots = guess.map((z, i) => ({ re: z.re + 1e-6*(i+1), im: z.im + 1e-6*(i+1) }));
+    return dkIterate(a, n, roots);
+  }
 
   function pEval(z){
     let r = {re: a[0], im: 0};
@@ -2477,25 +2648,45 @@ function polyRoots(coefs){
     const theta = 2*Math.PI*(i + 0.5)/n;
     roots.push({ re: R * Math.cos(theta), im: R * Math.sin(theta) });
   }
+  return dkIterate(a, n, roots);
+}
+function dkIterate(a, n, roots){
+  // Allocation-free Durand-Kerner on flat arrays.
+  const xr = new Float64Array(n), xi = new Float64Array(n);
+  for(let i = 0; i < n; i++){ xr[i] = roots[i].re; xi[i] = roots[i].im; }
   const maxIter = 200, tol = 1e-12;
   for(let iter = 0; iter < maxIter; iter++){
     let maxDelta = 0;
     for(let i = 0; i < n; i++){
-      let denom = {re: 1, im: 0};
+      const zr = xr[i], zi = xi[i];
+      // p(z) by Horner
+      let pr = a[0], pi = 0;
+      for(let k = 1; k <= n; k++){
+        const tr = pr*zr - pi*zi + a[k];
+        pi = pr*zi + pi*zr;
+        pr = tr;
+      }
+      // prod_{j!=i} (z_i - z_j)
+      let dr = 1, di = 0;
       for(let j = 0; j < n; j++){
         if(j === i) continue;
-        denom = rl_cMul(denom, rl_cSub(roots[i], roots[j]));
+        const wr = zr - xr[j], wi = zi - xi[j];
+        const tr = dr*wr - di*wi;
+        di = dr*wi + di*wr;
+        dr = tr;
       }
-      if(rl_cAbs(denom) < 1e-300) continue;
-      const num = pEval(roots[i]);
-      const delta = rl_cDiv(num, denom);
-      roots[i] = rl_cSub(roots[i], delta);
-      const dA = rl_cAbs(delta);
+      const dd = dr*dr + di*di;
+      if(dd < 1e-300) continue;
+      const qr = (pr*dr + pi*di)/dd, qi = (pi*dr - pr*di)/dd;
+      xr[i] = zr - qr; xi[i] = zi - qi;
+      const dA = Math.hypot(qr, qi);
       if(dA > maxDelta) maxDelta = dA;
     }
     if(maxDelta < tol) break;
   }
-  return roots;
+  const out = new Array(n);
+  for(let i = 0; i < n; i++) out[i] = { re: xr[i], im: xi[i] };
+  return out;
 }
 
 /* Controller polynomial:
@@ -2535,48 +2726,136 @@ function buildControllerPoly(Kp, Ki, Kd, N){
    - poles: roots of DcDp + NcNp
    - zeros: roots of NcNp  (controller zeros + plant zeros)
 */
-function closedLoopPolesZeros(Np, Dp, Nc, Dc){
+function closedLoopPolesZeros(Np, Dp, Nc, Dc, poleGuess){
   const num = polyMul(Nc, Np);
   const den = polyAdd(polyMul(Dc, Dp), num);
-  const poles = polyRoots(den);
+  const poles = polyRoots(den, poleGuess);
   const zeros = polyRoots(num);
   return { poles, zeros };
 }
 
-/* Compute root-locus sweep traces.
-   For each gain (Kp, Ki, Kd) that is currently nonzero, sweep that gain
-   from k/10 to 10*k on log scale, holding the others at their current values.
-   Returns: { current: {poles, zeros}, sweeps: { Kp: [{k, poles, zeros}], Ki: [...], Kd: [...] } }
-*/
-function computeRootLocus(Np, Dp, Kp, Ki, Kd, Nf){
-  // Current operating point
+/* Axis range used by the root-locus plot: 2x the extent of the current
+   closed-loop poles/zeros, symmetric about the origin (shared by the
+   renderer and by the adaptive trace refinement). */
+function rlocusAxisRange(current){
+  const pts = [...current.poles, ...current.zeros].filter(p => Number.isFinite(p.re) && Number.isFinite(p.im));
+  if(pts.length === 0) return { xMin: -1, xMax: 1, yMin: -1, yMax: 1 };
+  let reMax = 0, imMax = 0;
+  for(const p of pts){ reMax = Math.max(reMax, Math.abs(p.re)); imMax = Math.max(imMax, Math.abs(p.im)); }
+  reMax = Math.max(reMax, 1e-3);
+  if(imMax < 0.05 * reMax) imMax = reMax * 0.25;
+  return { xMin: -2*reMax, xMax: 2*reMax, yMin: -2*imMax, yMax: 2*imMax };
+}
+
+/* Greedy nearest-neighbour matching of two pole sets; returns the largest
+   displacement (in normalised axis units) between matched poles. */
+function poleSetGap(A, B, sx, sy){
+  const used = new Array(B.length).fill(false);
+  let worst = 0;
+  for(const a of A){
+    let best = Infinity, bi = -1;
+    for(let j = 0; j < B.length; j++){
+      if(used[j]) continue;
+      const d = Math.hypot((a.re - B[j].re)*sx, (a.im - B[j].im)*sy);
+      if(d < best){ best = d; bi = j; }
+    }
+    if(bi >= 0) used[bi] = true;
+    if(best > worst) worst = best;
+  }
+  return worst;
+}
+
+/* Root loci with respect to each PID gain.
+   With the other two gains held at their current values the characteristic
+   polynomial is linear in the swept gain, D0(s) + k*N0(s) = 0, so each trace is
+   a true (Evans) root locus in that gain, from k = 0 to k -> infinity. Samples are
+   log-spaced around a reference scale and refined adaptively so that consecutive
+   pole sets move by less than ~1% of the plot range.
+   Returns { current: {poles, zeros}, sweeps: { Kp: [{k, poles}], Ki: [...], Kd: [...] } } */
+function computeRootLocus(Np, Dp, Kp, Ki, Kd, Nf, fixedRange){
   const c0 = buildControllerPoly(Kp, Ki, Kd, Nf);
   const current = closedLoopPolesZeros(Np, Dp, c0.Nc, c0.Dc);
+  const R = fixedRange || rlocusAxisRange(current);
+  const sx = 1/(R.xMax - R.xMin), sy = 1/(R.yMax - R.yMin);
+  const tol = 0.01, maxDepth = 9, maxPts = 1500;
 
   const sweeps = { Kp: [], Ki: [], Kd: [] };
-  const Npts = 40;
+  const Kref = Math.max(Math.abs(Kp), Math.abs(Ki), Math.abs(Kd)) || 1;
   const sweepGain = (name, baseVal, setter) => {
-    if(baseVal === 0) return; // can't log-sweep around zero; skip
-    const lo = Math.log10(baseVal / 10);
-    const hi = Math.log10(baseVal * 10);
-    for(let i = 0; i < Npts; i++){
-      const k = Math.pow(10, lo + (hi - lo) * i / (Npts - 1));
-      const params = setter(k);
-      const c = buildControllerPoly(params.Kp, params.Ki, params.Kd, Nf);
-      const pz = closedLoopPolesZeros(Np, Dp, c.Nc, c.Dc);
-      sweeps[name].push({ k, poles: pz.poles, zeros: pz.zeros });
+    const scale = baseVal !== 0 ? Math.abs(baseVal) : Kref;
+    let lastPoles = null;
+    const polesAt = (k) => {
+      const q = setter(k);
+      const c = buildControllerPoly(q.Kp, q.Ki, q.Kd, Nf);
+      const r = polyRoots(polyAdd(polyMul(c.Dc, Dp), polyMul(c.Nc, Np)), lastPoles);
+      lastPoles = r;
+      return r;
+    };
+    // initial grid: k = 0, then 4 decades below and above the scale
+    const ks = [0];
+    const lo = Math.log10(scale) - 4, hi = Math.log10(scale) + 4, n0 = 48;
+    for(let i = 0; i <= n0; i++) ks.push(Math.pow(10, lo + (hi - lo)*i/n0));
+    const out = [];
+    let prev = { k: ks[0], poles: polesAt(ks[0]) };
+    out.push(prev);
+    const refine = (p0, p1, depth) => {
+      if(out.length > maxPts) { out.push(p1); return; }
+      const gap = poleSetGap(p0.poles, p1.poles, sx, sy);
+      // only refine where the segment is at least partly inside the plot window
+      const inside = [...p0.poles, ...p1.poles].some(z => z.re >= R.xMin && z.re <= R.xMax && z.im >= R.yMin && z.im <= R.yMax);
+      if(gap > tol && inside && depth < maxDepth){
+        const km = (p0.k === 0) ? p1.k * 0.5 : Math.sqrt(p0.k * p1.k);
+        const pm = { k: km, poles: polesAt(km) };
+        refine(p0, pm, depth + 1);
+        refine(pm, p1, depth + 1);
+      } else {
+        out.push(p1);
+      }
+    };
+    for(let i = 1; i < ks.length; i++){
+      const cur = { k: ks[i], poles: polesAt(ks[i]) };
+      refine(prev, cur, 0);
+      prev = cur;
     }
+    sweeps[name] = out;
   };
   sweepGain("Kp", Kp, (k) => ({ Kp: k, Ki, Kd }));
   sweepGain("Ki", Ki, (k) => ({ Kp, Ki: k, Kd }));
   sweepGain("Kd", Kd, (k) => ({ Kp, Ki, Kd: k }));
 
-  return { current, sweeps };
+  // Critical gains: where a pole crosses the imaginary axis along each trace.
+  const critical = { Kp: [], Ki: [], Kd: [] };
+  for(const name of ["Kp", "Ki", "Kd"]){
+    const tr = sweeps[name];
+    for(let i = 1; i < tr.length; i++){
+      const A = tr[i-1].poles, B = tr[i].poles;
+      // match each pole of A to nearest in B and test for a sign change of Re
+      const used = new Array(B.length).fill(false);
+      for(const a of A){
+        let best = Infinity, bi = -1;
+        for(let j = 0; j < B.length; j++){
+          if(used[j]) continue;
+          const d = Math.hypot(a.re - B[j].re, a.im - B[j].im);
+          if(d < best){ best = d; bi = j; }
+        }
+        if(bi < 0) continue;
+        used[bi] = true;
+        const bb = B[bi];
+        if((a.re < 0 && bb.re > 0) || (a.re > 0 && bb.re < 0)){
+          const f = a.re / (a.re - bb.re);
+          const k0 = tr[i-1].k, k1 = tr[i].k;
+          critical[name].push({ k: k0 + f*(k1 - k0), im: a.im + f*(bb.im - a.im) });
+        }
+      }
+    }
+  }
+  return { current, sweeps, critical, range: R };
 }
 
 /* ---------- Rendering ---------- */
 const rlocusCanvas = document.getElementById("rlocusPlot");
 const rlocusCtx = rlocusCanvas.getContext("2d");
+rlocusCanvas.style.touchAction = "none";
 let rlocusData = null;
 
 function resizeRlocusCanvas(){
@@ -2627,34 +2906,10 @@ function drawRlocusPlot(){
   const padL = 60, padR = 22, padT = 26, padB = 42;
   const B = { x: padL, y: padT, w: rect.width - padL - padR, h: rect.height - padT - padB };
 
-  // Axis range: base on current poles+zeros only (not sweep).
-  // Both axes: 2× max|component|, symmetric about origin.
-  // For all-real cases, floor the imaginary half-extent to a fraction of the real half-extent
-  // so the plot doesn't collapse to a horizontal line.
   const cur = rlocusData.current;
   const curPoints = [...cur.poles, ...cur.zeros].filter(p => Number.isFinite(p.re) && Number.isFinite(p.im));
-
-  let xMin, xMax, yMin, yMax;
-  if(curPoints.length === 0){
-    xMin = -1; xMax = 1; yMin = -1; yMax = 1;
-  } else {
-    let reMax = 0, imMax = 0;
-    for(const p of curPoints){
-      reMax = Math.max(reMax, Math.abs(p.re));
-      imMax = Math.max(imMax, Math.abs(p.im));
-    }
-    reMax = Math.max(reMax, 1e-3);
-    // If all current poles/zeros are essentially on the real axis (within 5% of reMax),
-    // floor the imaginary half-extent so the plot keeps some height. This catches both
-    // exactly-real cases and numerically noisy near-real cases (e.g. triple-root polynomials).
-    if(imMax < 0.05 * reMax) imMax = reMax * 0.25;
-    // x-axis: 2× max |Re|, symmetric
-    xMin = -2 * reMax;
-    xMax =  2 * reMax;
-    // y-axis: 2× max |Im|, symmetric
-    yMin = -2 * imMax;
-    yMax =  2 * imMax;
-  }
+  const AR = rlocusData.range || rlocusAxisRange(cur);
+  let { xMin, xMax, yMin, yMax } = AR;
 
   // Collect all points (including sweeps) for drawing — axis range is already fixed above.
   const all = [...curPoints];
@@ -2753,25 +3008,30 @@ function drawRlocusPlot(){
     rlocusCtx.fillText(formatNum(v), B.x - 7, Y);
   }
 
-  // ---- Sweep traces ----
-  const colors = { Kp: "#0072BD", Ki: "#2e8b3d", Kd: "#7E2F8E" };
+  // ---- Root-locus traces (one per gain) ----
+  const colors = { Kp: "#0072BD", Ki: "#2e8b3d", Kd: "#C9A000" };
   for(const name of ["Kp", "Ki", "Kd"]){
     const steps = rlocusData.sweeps[name];
     if(!steps.length) continue;
+    const locked = rlDrag.active && rlDrag.trace === name;
+    const dim = rlDrag.active && rlDrag.trace && !locked;
     rlocusCtx.save();
     rlocusCtx.beginPath();
     rlocusCtx.rect(B.x, B.y, B.w, B.h);
     rlocusCtx.clip();
     rlocusCtx.fillStyle = colors[name];
-    // tiny dots along the trace
+    rlocusCtx.globalAlpha = dim ? 0.25 : 1;
+    const rad = locked ? 2.0 : 1.4;
     for(const step of steps){
       for(const p of step.poles){
         if(!Number.isFinite(p.re) || !Number.isFinite(p.im)) continue;
         rlocusCtx.beginPath();
-        rlocusCtx.arc(xPx(p.re), yPx(p.im), 1.6, 0, 2*Math.PI);
+        rlocusCtx.arc(xPx(p.re), yPx(p.im), rad, 0, 2*Math.PI);
         rlocusCtx.fill();
       }
     }
+    // (Critical gains at the jω crossings are computed in rlocusData.critical
+    //  but not drawn: the gain inputs on the left already track the drag.)
     rlocusCtx.restore();
   }
 
@@ -2825,14 +3085,94 @@ function drawRlocusPlot(){
   rlocusData.__map = { xPx, yPx, xMin, xMax, yMin, yMax, B };
 }
 
-/* Tooltip for root-locus: show nearest current closed-loop pole or zero. */
-rlocusCanvas.addEventListener("mousemove", (e) => {
+/* ---------- Drag a closed-loop pole along a root-locus trace ----------
+   Press on a current pole (red square) and drag: after a few pixels the trace
+   nearest to the pointer (Kp, Ki or Kd) is locked and the pointer position is
+   projected onto that trace; the corresponding gain is written to its input
+   and everything is recomputed. Only that one gain changes during the drag. */
+const rlDrag = { active: false, trace: null, startX: 0, startY: 0, pointerId: null, range: null };
+
+function rlNearestSample(mx, my, traceName){
+  const { xPx, yPx } = rlocusData.__map;
+  let best = null, bestD2 = Infinity;
+  const names = traceName ? [traceName] : ["Kp", "Ki", "Kd"];
+  for(const name of names){
+    const tr = rlocusData.sweeps[name];
+    for(let i = 0; i < tr.length; i++){
+      for(const p of tr[i].poles){
+        if(!Number.isFinite(p.re) || !Number.isFinite(p.im)) continue;
+        const dx = xPx(p.re) - mx, dy = yPx(p.im) - my;
+        const d2 = dx*dx + dy*dy;
+        if(d2 < bestD2){ bestD2 = d2; best = { name, k: tr[i].k, idx: i, d: Math.sqrt(d2) }; }
+      }
+    }
+  }
+  return best;
+}
+
+function rlNearestCurrentPole(mx, my){
+  const { xPx, yPx } = rlocusData.__map;
+  let bestD2 = Infinity;
+  for(const p of rlocusData.current.poles){
+    if(!Number.isFinite(p.re) || !Number.isFinite(p.im)) continue;
+    const dx = xPx(p.re) - mx, dy = yPx(p.im) - my;
+    bestD2 = Math.min(bestD2, dx*dx + dy*dy);
+  }
+  return Math.sqrt(bestD2);
+}
+
+function showRlTip(html, clientX, clientY){
+  tip.innerHTML = html;
+  tip.classList.add("show");
+  const tipW = tip.offsetWidth || 280;
+  const flip = (clientX + tipW + 24) > window.innerWidth;
+  tip.style.transform = flip ? `translate(${-tipW - 12}px, -130%)` : "translate(12px, -130%)";
+  tip.style.left = clientX + "px";
+  tip.style.top  = clientY + "px";
+}
+
+rlocusCanvas.addEventListener("pointerdown", (e) => {
+  if(!rlocusData || !rlocusData.__map || rlocusData.disabled) return;
+  const rect = rlocusCanvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+  if(rlNearestCurrentPole(mx, my) > 12) return;
+  rlDrag.active = true; rlDrag.trace = null;
+  rlDrag.range = rlocusData.range || rlocusAxisRange(rlocusData.current);
+  rlDrag.startX = mx; rlDrag.startY = my; rlDrag.pointerId = e.pointerId;
+  rlocusCanvas.setPointerCapture(e.pointerId);
+  rlocusCanvas.style.cursor = "grabbing";
+  e.preventDefault();
+});
+
+rlocusCanvas.addEventListener("pointermove", (e) => {
   if(!rlocusData || !rlocusData.__map || rlocusData.disabled){ tip.classList.remove("show"); return; }
   const rect = rlocusCanvas.getBoundingClientRect();
   const mx = e.clientX - rect.left, my = e.clientY - rect.top;
-  const { xPx, yPx, B } = rlocusData.__map;
-  if(mx < B.x || mx > B.x + B.w || my < B.y || my > B.y + B.h){ tip.classList.remove("show"); return; }
-  // Find nearest current pole/zero in pixel space
+  const { B } = rlocusData.__map;
+
+  if(rlDrag.active){
+    if(!rlDrag.trace){
+      if(Math.hypot(mx - rlDrag.startX, my - rlDrag.startY) < 5) return;
+      const n = rlNearestSample(mx, my, null);
+      if(!n) return;
+      rlDrag.trace = n.name;
+    }
+    const n = rlNearestSample(mx, my, rlDrag.trace);
+    if(!n) return;
+    const id = rlDrag.trace.toLowerCase();
+    const cur = Number(inputs[id].value) || 0;
+    if(Math.abs(n.k - cur) > 1e-12 * Math.max(1, Math.abs(cur))){
+      inputs[id].value = formatGain(n.k);
+      runSim();
+    }
+    showRlTip(`${rlDrag.trace} = ${formatGain(n.k)}`, e.clientX, e.clientY);
+    return;
+  }
+
+  // Hover (not dragging)
+  if(mx < B.x || mx > B.x + B.w || my < B.y || my > B.y + B.h){ tip.classList.remove("show"); rlocusCanvas.style.cursor = ""; return; }
+  rlocusCanvas.style.cursor = rlNearestCurrentPole(mx, my) <= 12 ? "grab" : "";
+  const { xPx, yPx } = rlocusData.__map;
   let best = null, bestD2 = Infinity;
   const consider = (arr, kind) => {
     for(const p of arr){
@@ -2844,22 +3184,46 @@ rlocusCanvas.addEventListener("mousemove", (e) => {
   };
   consider(rlocusData.current.poles, "pole");
   consider(rlocusData.current.zeros, "zero");
-  if(!best || bestD2 > 30*30){ tip.classList.remove("show"); return; }
-  const p = best.p;
-  const wn = Math.hypot(p.re, p.im);
-  const zeta = wn > 1e-12 ? -p.re / wn : 1;
-  const label = best.kind === "pole" ? "CL pole" : "CL zero";
-  tip.innerHTML = best.kind === "pole"
-    ? `${label}: ${p.re.toFixed(3)} ${p.im>=0?'+':'−'} ${Math.abs(p.im).toFixed(3)}j &nbsp; ζ=${zeta.toFixed(3)} &nbsp; ω<sub>n</sub>=${wn.toFixed(3)}`
-    : `${label}: ${p.re.toFixed(3)} ${p.im>=0?'+':'−'} ${Math.abs(p.im).toFixed(3)}j`;
-  tip.classList.add("show");
-  const tipW = tip.offsetWidth || 280;
-  const flip = (e.clientX + tipW + 24) > window.innerWidth;
-  tip.style.transform = flip ? `translate(${-tipW - 12}px, -130%)` : "translate(12px, -130%)";
-  tip.style.left = (e.clientX) + "px";
-  tip.style.top  = (e.clientY) + "px";
+  if(best && bestD2 <= 30*30){
+    const p = best.p;
+    const wn = Math.hypot(p.re, p.im);
+    const zeta = wn > 1e-12 ? -p.re / wn : 1;
+    const label = best.kind === "pole" ? "CL pole" : "CL zero";
+    const html = best.kind === "pole"
+      ? `${label}: ${p.re.toFixed(3)} ${p.im>=0?'+':'−'} ${Math.abs(p.im).toFixed(3)}j &nbsp; ζ=${zeta.toFixed(3)} &nbsp; ω<sub>n</sub>=${wn.toFixed(3)}<br><span style="opacity:.7">drag to move along a locus</span>`
+      : `${label}: ${p.re.toFixed(3)} ${p.im>=0?'+':'−'} ${Math.abs(p.im).toFixed(3)}j`;
+    showRlTip(html, e.clientX, e.clientY);
+    return;
+  }
+  // Otherwise: nearest trace sample -> show that gain value
+  const n = rlNearestSample(mx, my, null);
+  if(n && n.d <= 10){
+    showRlTip(`${n.name} = ${formatGain(n.k)}`, e.clientX, e.clientY);
+  } else {
+    tip.classList.remove("show");
+  }
 });
-rlocusCanvas.addEventListener("mouseleave", () => tip.classList.remove("show"));
+
+function endRlDrag(e){
+  if(!rlDrag.active) return;
+  rlDrag.active = false; rlDrag.trace = null;
+  try { rlocusCanvas.releasePointerCapture(rlDrag.pointerId); } catch(_){}
+  rlocusCanvas.style.cursor = "";
+  tip.classList.remove("show");
+  rlDrag.range = null;
+  runSim(); // recompute with auto-scaled axes
+}
+rlocusCanvas.addEventListener("pointerup", endRlDrag);
+rlocusCanvas.addEventListener("pointercancel", endRlDrag);
+
+function formatGain(k){
+  if(k === 0) return "0";
+  const a = Math.abs(k);
+  if(a >= 1e4 || a < 1e-3) return k.toExponential(3);
+  return String(parseFloat(k.toPrecision(4)));
+}
+
+rlocusCanvas.addEventListener("pointerleave", () => { if(!rlDrag.active) tip.classList.remove("show"); });
 
 window.addEventListener("resize", () => { drawRlocusPlot(); });
 
@@ -2979,6 +3343,9 @@ function runSim(){
     setMetric("m_rise", m.rise, 3);
     setMetric("m_os",   m.overshoot, 2);
     setMetric("m_ts",   m.settle, 3);
+    // Red dash when the response did not enter the 2% band within Tstop:
+    // the other step metrics are then computed from unsettled data.
+    document.getElementById("metric_ts").classList.toggle("unsettled", !Number.isFinite(m.settle));
     setMetric("m_ss",   m.yss, 4);
     setMetric("m_err",  m.sserr, 4);
 
@@ -2991,21 +3358,10 @@ function runSim(){
     setMetric("m_pm",  margins.PM,  2);
     setMetric("m_wgc", margins.wgc, 3);
     setMetric("m_wpc", margins.wpc, 3);
-    // Stability flag from margins (closed-loop)
+    // Closed-loop stability flag is set below, after the Nyquist and
+    // pole computations: "GM>0 and PM>0" is only a valid test for open loops
+    // with no RHP poles, so it is not used.
     const stableEl = document.getElementById("m_stable");
-    // Treat Inf margins as stable; treat NaN as undetermined.
-    const gmOK = (margins.GM === Infinity) || (Number.isFinite(margins.GM) && margins.GM > 0);
-    const pmOK = (margins.PM === Infinity) || (Number.isFinite(margins.PM) && margins.PM > 0);
-    const gmKnown = (margins.GM === Infinity) || Number.isFinite(margins.GM);
-    const pmKnown = (margins.PM === Infinity) || Number.isFinite(margins.PM);
-    if(gmKnown && pmKnown){
-      const stable = gmOK && pmOK;
-      stableEl.innerText = stable ? "Yes" : "No";
-      stableEl.style.color = stable ? "#2e8b3d" : "#c0392b";
-    } else {
-      stableEl.innerText = "—";
-      stableEl.style.color = "";
-    }
 
     // Render current view
     if(currentView === "step") drawPlot();
@@ -3014,6 +3370,11 @@ function runSim(){
 
     // Nyquist data (reuses bode w, magDB, phaseDeg)
     nyquistData = computeNyquist(bode);
+    // Exact encirclement count and Nyquist stability (works with dead time).
+    const nyq = nyquistWinding(p.numCoefs, p.denCoefs, p.L, p.Kp, p.Ki, p.Kd, p.Nf);
+    nyquistData.totalEnc = nyq.Ncw;
+    nyquistData.Z = nyq.Z;
+    nyquistData.P = nyq.P;
     // Ms and Mt with infinity handling
     const msEl = document.getElementById("m_ms");
     const mtEl = document.getElementById("m_mt");
@@ -3040,12 +3401,15 @@ function runSim(){
     setMetric("m_sm", nyquistData.smMin, 3);
 
     const encEl = document.getElementById("m_encircle");
-    if(nyquistData.totalEnc === 0){
+    if(!Number.isFinite(nyquistData.totalEnc)){
+      encEl.innerText = "—";
+      encEl.style.color = "";
+    } else if(nyquistData.totalEnc === 0){
       encEl.innerText = "0";
       encEl.style.color = "";
     } else {
       const sign = nyquistData.totalEnc > 0 ? "+" : "−";
-      encEl.innerText = `${sign}${Math.abs(nyquistData.totalEnc)} (CCW+)`;
+      encEl.innerText = `${sign}${Math.abs(nyquistData.totalEnc)} (CW+)`;
       encEl.style.color = "#c0392b";
     }
     if(currentView === "nyquist") drawNyquistPlot();
@@ -3062,7 +3426,9 @@ function runSim(){
       document.getElementById("m_poles_list").innerText = "—";
       document.getElementById("m_zeros_list").innerText = "—";
     } else {
-      rlocusData = computeRootLocus(p.numCoefs, p.denCoefs, p.Kp, p.Ki, p.Kd, p.Nf);
+      // While a pole is being dragged the axis range is frozen (see rlDrag) so the
+      // pointer-to-data mapping does not change under the pointer.
+      rlocusData = computeRootLocus(p.numCoefs, p.denCoefs, p.Kp, p.Ki, p.Kd, p.Nf, rlDrag.active ? rlDrag.range : null);
       // Dominant pole = pole with smallest |Re| among unstable, else among stable closest to imag axis.
       const poles = rlocusData.current.poles.filter(z => Number.isFinite(z.re) && Number.isFinite(z.im));
       let dom = null;
@@ -3120,6 +3486,27 @@ function runSim(){
     }
     if(currentView === "rlocus") drawRlocusPlot();
 
+    // ---- Closed-loop stability (Bode tab) ----
+    // L = 0: exact, from the closed-loop characteristic polynomial roots.
+    // L > 0: Nyquist criterion Z = P + N, with P = number of open-loop RHP
+    //        poles (plant only; the controller poles at 0 and -N are not in
+    //        the RHP) and N = net clockwise encirclements of (-1, 0).
+    {
+      let stable = null;
+      if(p.L > 0){
+        if(Number.isFinite(nyquistData.Z)) stable = (nyquistData.Z === 0);
+      } else if(rlocusData && rlocusData.current){
+        const cp = rlocusData.current.poles.filter(z => Number.isFinite(z.re));
+        if(cp.length) stable = cp.every(z => z.re <= 1e-9);
+      }
+      if(stable === null){
+        stableEl.innerText = "—"; stableEl.style.color = "";
+      } else {
+        stableEl.innerText = stable ? "Yes" : "No";
+        stableEl.style.color = stable ? "#2e8b3d" : "#c0392b";
+      }
+    }
+
   } catch(err){
     showError(err.message);
     plotData = null;
@@ -3142,13 +3529,13 @@ document.getElementById("viewRlocusBtn").addEventListener("click", () => setView
 
 document.getElementById("resetBtn").addEventListener("click", () => {
   inputs.num.value = "1";
-  inputs.den.value = "1 2 1";
+  inputs.den.value = "1 3 3 1";
   inputs.delay.value = "0";
-  inputs.kp.value = "1";
-  inputs.ki.value = "0";
+  inputs.kp.value = "2";
+  inputs.ki.value = "1";
   inputs.kd.value = "0";
   inputs.nfilt.value = "100";
-  inputs.tstop.value = "10";
+  inputs.tstop.value = "25";
   inputs.dt.value = "0.01";
   inputs.ref.value = "1";
   runSim();
